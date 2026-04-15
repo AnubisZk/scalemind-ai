@@ -36,9 +36,9 @@ export async function runContentValidity(ratings) {
 
 export async function getAIInterpretation(moduleOrRequest: any, data?: any, lang = 'en') {
   let module: string, reqData: any, reqLang: string
-  if (typeof moduleOrRequest === 'object' && moduleOrRequest.module) {
-    module = moduleOrRequest.module
-    reqData = moduleOrRequest.data || moduleOrRequest.result || {}
+  if (typeof moduleOrRequest === 'object' && (moduleOrRequest.module || moduleOrRequest.analysisType)) {
+    module = moduleOrRequest.module || moduleOrRequest.analysisType
+    reqData = moduleOrRequest.data || moduleOrRequest.results || moduleOrRequest.result || {}
     reqLang = moduleOrRequest.lang || 'en'
   } else {
     module = moduleOrRequest

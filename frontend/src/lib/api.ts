@@ -35,7 +35,7 @@ export async function runContentValidity(ratings) {
 }
 
 export async function getAIInterpretation(module, data, lang = 'en') {
-  const res = await fetch('https://scalemindaipro.nemesiszsk.workers.dev', {
+  const res = await fetch('https://scalemind-ai.nemesiszsk.workers.dev', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ module, data, lang }),

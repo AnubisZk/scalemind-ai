@@ -1,0 +1,19 @@
+# ============================================================
+# Analysis Engine Worker
+# ============================================================
+# Bu dosyayı workers/analysis-engine/ klasörüne kopyala
+# ============================================================
+
+name = "scalemind-analysis"
+main = "index.ts"
+compatibility_date = "2024-09-01"
+
+[vars]
+ALLOWED_ORIGIN = "https://scalemind-ai.netlify.app"
+
+# R_API_URL secret olarak tanımlanır:
+# wrangler secret put R_API_URL
+
+# Geliştirme için
+[dev]
+port = 8787

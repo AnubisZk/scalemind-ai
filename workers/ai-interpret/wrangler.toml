@@ -1,0 +1,16 @@
+# ============================================================
+# AI Interpretation Worker
+# ============================================================
+
+name = "scalemind-ai-interpret"
+main = "index.ts"
+compatibility_date = "2024-09-01"
+
+[vars]
+ALLOWED_ORIGIN = "https://scalemind-ai.netlify.app"
+
+# Secret olarak ekle:
+# wrangler secret put ANTHROPIC_API_KEY
+
+[dev]
+port = 8788

@@ -34,8 +34,14 @@ export async function runContentValidity(ratings) {
   return post('/content-validity', ratings)
 }
 
-export async function getAIInterpretation(request) {
-  return post('/interpret', request)
+export async function getAIInterpretation(module, data, lang = 'en') {
+  const res = await fetch('https://scalemindaipro.nemesiszsk.workers.dev', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ module, data, lang }),
+  })
+  if (!res.ok) throw new Error('AI yorum alınamadı')
+  return res.json()
 }
 
 export async function parseDataset(file) {

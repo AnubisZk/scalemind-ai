@@ -34,11 +34,21 @@ export async function runContentValidity(ratings) {
   return post('/content-validity', ratings)
 }
 
-export async function getAIInterpretation(module, data, lang = 'en') {
+export async function getAIInterpretation(moduleOrRequest: any, data?: any, lang = 'en') {
+  let module: string, reqData: any, reqLang: string
+  if (typeof moduleOrRequest === 'object' && moduleOrRequest.module) {
+    module = moduleOrRequest.module
+    reqData = moduleOrRequest.data || moduleOrRequest.result || {}
+    reqLang = moduleOrRequest.lang || 'en'
+  } else {
+    module = moduleOrRequest
+    reqData = data || {}
+    reqLang = lang
+  }
   const res = await fetch('https://scalemind-ai.nemesiszsk.workers.dev', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ module, data, lang }),
+    body: JSON.stringify({ module, data: reqData, lang: reqLang }),
   })
   if (!res.ok) throw new Error('AI yorum alınamadı')
   return res.json()

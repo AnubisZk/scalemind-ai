@@ -155,7 +155,9 @@ def reliability(req: ReliabilityRequest):
             "items": req.items,
             "subscales": req.subscales or {},
         })
-    except Exception:
+    except Exception as e:
+        import logging
+        logging.error(f"R reliability hatasi: {e}")
         # R yoksa Python fallback (alpha + split-half)
         result = compute_reliability(df)
     return {"success": True, "result": result}

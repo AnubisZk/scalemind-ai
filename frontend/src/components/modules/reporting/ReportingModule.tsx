@@ -5,7 +5,7 @@
 import React, { useState } from 'react'
 import { useAppStore } from '../../../store/useAppStore'
 
-const BASE_URL = 'http://localhost:8000'
+const BASE_URL = import.meta.env.VITE_ANALYSIS_WORKER_URL || 'https://scalemind-ai-production.up.railway.app'
 
 interface StepSummary {
   id: string

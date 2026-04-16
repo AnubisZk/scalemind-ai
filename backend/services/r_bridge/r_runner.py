@@ -51,7 +51,16 @@ def run_r_script(script_name: str, input_data: dict) -> dict:
         raise RuntimeError(f"R scripti çıktı üretmedi: {script_name}")
 
     try:
-        result = json.loads(stdout)
+        # R uyarılarını filtrele, sadece JSON satırını al
+        json_line = None
+        for l in stdout.strip().split('\n'):
+            l = l.strip()
+            if l.startswith('{'):
+                json_line = l
+                break
+        if not json_line:
+            raise ValueError(f"R JSON bulunamadı: {stdout[:200]}")
+        result = json.loads(json_line)
     except json.JSONDecodeError as e:
         raise RuntimeError(f"R JSON ayrıştırma hatası: {e}\nR stdout: {stdout[:500]}")
 

@@ -117,8 +117,8 @@ function PasswordScreen({ onUnlock }: { onUnlock: () => void }) {
 }
 
 export default function App() {
-  const [unlocked, setUnlocked] = React.useState(() => sessionStorage.getItem('sm_auth') === '1')
-  if (!unlocked) return <PasswordScreen onUnlock={() => { sessionStorage.setItem('sm_auth', '1'); setUnlocked(true) }} />
+  const [unlocked, setUnlocked] = React.useState(() => sessionStorage.getItem('sm_auth') === '1' || localStorage.getItem('sm_auth') === '1')
+  if (!unlocked) return <PasswordScreen onUnlock={() => { sessionStorage.setItem('sm_auth', '1'); localStorage.setItem('sm_auth', '1'); setUnlocked(true) }} />
   const { project, activeStep } = useAppStore()
   if (!project) {
     return <div style={{ minHeight: '100vh', background: '#fafafa' }}><WelcomeScreen /></div>

@@ -3,6 +3,7 @@
 # psych: Cronbach alpha + McDonald omega
 # ============================================================
 
+sink(stderr(), type = "message")
 library(psych)
 library(jsonlite)
 

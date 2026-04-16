@@ -13,7 +13,14 @@ data_list  <- params$data
 items      <- unlist(params$items)
 subscales  <- params$subscales  # {name: [items]} veya boş
 
-df <- as.data.frame(lapply(data_list[items], unlist))
+selected <- data_list[items]
+max_len <- max(sapply(selected, length))
+data_padded <- lapply(selected, function(x) {
+  x <- as.numeric(unlist(x))
+  length(x) <- max_len
+  x
+})
+df <- as.data.frame(data_padded)
 df <- na.omit(df)
 n  <- nrow(df)
 

@@ -184,6 +184,28 @@ export default function UploadModule() {
                   </tr>
                 </thead>
                 <tbody>
+                {/* Toplu işlem butonları */}
+                <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => {
+                      const updated = dataset.variables.map((v: any) => ({ ...v, type: 'likert' }))
+                      setDataset({ ...dataset, variables: updated })
+                    }}
+                    style={{ padding: '5px 12px', borderRadius: 6, border: '0.5px solid #185FA5', background: '#E6F1FB', color: '#185FA5', fontSize: 12, cursor: 'pointer' }}
+                  >
+                    Tümünü Likert Yap
+                  </button>
+                  <button
+                    onClick={() => {
+                      sessionStorage.removeItem('scalemind_rawdata')
+                      localStorage.removeItem('sm_auth')
+                      window.location.reload()
+                    }}
+                    style={{ padding: '5px 12px', borderRadius: 6, border: '0.5px solid #A32D2D', background: '#FCEBEB', color: '#A32D2D', fontSize: 12, cursor: 'pointer', marginLeft: 'auto' }}
+                  >
+                    Veriyi Sıfırla
+                  </button>
+                </div>
                   {dataset.variables.map((v, i) => (
                     <tr key={v.name} style={{ borderBottom: '0.5px solid var(--color-border-tertiary)', background: i % 2 === 0 ? 'transparent' : 'var(--color-background-secondary)' }}>
                       <td style={{ padding: '7px 12px', fontWeight: 500, color: 'var(--color-text-primary)' }}>{v.name}</td>

@@ -36,14 +36,14 @@ export async function runContentValidity(ratings) {
 
 export async function getAIInterpretation(moduleOrRequest: any, data?: any, lang = 'en') {
   let module: string, reqData: any, reqLang: string
-  if (typeof moduleOrRequest === 'object' && (moduleOrRequest.module || moduleOrRequest.analysisType)) {
-    module = moduleOrRequest.module || moduleOrRequest.analysisType
-    reqData = moduleOrRequest.data || moduleOrRequest.results || moduleOrRequest.result || {}
-    reqLang = moduleOrRequest.lang || 'en'
+  if (typeof moduleOrRequest === 'object') {
+    module = moduleOrRequest.module || moduleOrRequest.analysisType || 'normality'
+    reqData = moduleOrRequest.data || moduleOrRequest.results || moduleOrRequest.result || moduleOrRequest || {}
+    reqLang = moduleOrRequest.lang || lang || 'en'
   } else {
-    module = moduleOrRequest
+    module = moduleOrRequest || 'normality'
     reqData = data || {}
-    reqLang = lang
+    reqLang = lang || 'en'
   }
   const res = await fetch('https://scalemind-ai.nemesiszsk.workers.dev', {
     method: 'POST',

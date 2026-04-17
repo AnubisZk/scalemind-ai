@@ -181,6 +181,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >☰</button>
+
+            {/* Çıkış */}
+            <button
+              onClick={() => { sessionStorage.clear(); localStorage.clear(); window.location.reload() }}
+              style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px', borderRadius: 20, border: '1px solid #e0e0e0', background: 'white', fontSize: 11, color: '#666', cursor: 'pointer' }}
+            >
+              ⏏ Çıkış
+            </button>
           <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-primary)' }}>
             {ANALYSIS_STEPS.find((s) => s.id === activeStep)?.labelTr ?? ''}
           </span>

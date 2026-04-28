@@ -10,6 +10,7 @@ import EFAModule from './components/modules/efa/EFAModule'
 import CFAModule from './components/modules/cfa/CFAModule'
 import ReportingModule from './components/modules/reporting/ReportingModule'
 import SEMModule from './components/modules/sem/SEMModule'
+import StatisticsModule from './components/modules/statistics/StatisticsModule'
 import { useAppStore, ANALYSIS_STEPS } from './store/useAppStore'
 import type { AnalysisStepId, StepStatus } from './types'
 
@@ -80,6 +81,7 @@ function StepRouter({ stepId }: { stepId: AnalysisStepId }) {
     case 'cfa':              return <CFAModule />
     case 'sem':              return <SEMModule />
     case 'reporting':        return <ReportingModule />
+    case 'statistics':       return <StatisticsModule />
     default:                 return <PlaceholderModule stepId={stepId} />
   }
 }

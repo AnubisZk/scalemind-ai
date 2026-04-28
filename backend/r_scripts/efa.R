@@ -20,6 +20,9 @@ items     <- params$items
 options   <- params$options
 
 # DataFrame oluştur
+valid_items <- items[items %in% names(data_list)]
+if (length(valid_items) == 0) valid_items <- names(data_list)
+items <- valid_items
 df <- as.data.frame(data_list)[, items, drop = FALSE]
 df <- na.omit(df)
 n  <- nrow(df)

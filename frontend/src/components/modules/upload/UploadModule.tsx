@@ -25,7 +25,7 @@ const TYPE_COLORS: Record<VariableType, string> = {
 }
 
 export default function UploadModule() {
-  const { project, updateDataset, setStepResult, setActiveStep, setStepStatus, setLoading, loading } = useAppStore()
+  const { project, updateDataset, setStepResult, setActiveStep, setStepStatus, setLoading, loading, resetProject } = useAppStore()
   const [warnings, setWarnings] = useState<string[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [rawData, setRawData] = useState<Record<string, (number | string | null)[]>>({})
@@ -188,8 +188,9 @@ export default function UploadModule() {
                 <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
                   <button
                     onClick={() => {
+                      if (!dataset) return
                       const updated = dataset.variables.map((v: any) => ({ ...v, type: 'likert' }))
-                      setDataset({ ...dataset, variables: updated })
+                      updateDataset({ ...dataset, variables: updated })
                     }}
                     style={{ padding: '5px 12px', borderRadius: 6, border: '0.5px solid #185FA5', background: '#E6F1FB', color: '#185FA5', fontSize: 12, cursor: 'pointer' }}
                   >
@@ -198,7 +199,9 @@ export default function UploadModule() {
                   <button
                     onClick={() => {
                       sessionStorage.removeItem('scalemind_rawdata')
+                      sessionStorage.removeItem('sm_auth')
                       localStorage.removeItem('sm_auth')
+                      resetProject()
                       window.location.reload()
                     }}
                     style={{ padding: '5px 12px', borderRadius: 6, border: '0.5px solid #A32D2D', background: '#FCEBEB', color: '#A32D2D', fontSize: 12, cursor: 'pointer', marginLeft: 'auto' }}

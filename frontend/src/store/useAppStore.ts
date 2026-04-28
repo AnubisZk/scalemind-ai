@@ -25,6 +25,7 @@ export const ANALYSIS_STEPS = [
   { id: 'cfa' as AnalysisStepId,              labelTr: 'DFA (CFA)' },
   { id: 'sem' as AnalysisStepId,              labelTr: 'Yapısal Model' },
   { id: 'reporting' as AnalysisStepId,        labelTr: 'Rapor' },
+  { id: 'statistics' as AnalysisStepId,      labelTr: 'İstatistiksel Analizler' },
 ]
 
 interface AppState {

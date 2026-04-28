@@ -121,7 +121,7 @@ export default function ReliabilityModule() {
       const r = res.result ?? res
       console.log('RESULT:', JSON.stringify(r))
       setResult(r)
-      setWarnings(r.warnings ?? [])
+      setWarnings(Array.isArray(r.warnings) ? r.warnings : r.warnings ? [r.warnings] : [])
       setStepResult('reliability', {
         type: 'reliability',
         data: r,

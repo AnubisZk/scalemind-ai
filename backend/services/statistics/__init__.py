@@ -1,0 +1,1 @@
+"""ScaleMind-AI Statistics Extension — Services"""

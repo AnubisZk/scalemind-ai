@@ -21,13 +21,14 @@ type Tab = 'results' | 'education' | 'ai'
 export default function AnalysisPanel({
   title,
   subtitle,
-  warnings = [],
+  warnings: warningsRaw = [],
   children,
   educationContent,
   aiComment,
   isLoadingAI,
   onRequestAI,
 }: AnalysisPanelProps) {
+  const warnings = Array.isArray(warningsRaw) ? warningsRaw : warningsRaw ? [String(warningsRaw)] : []
   const [activeTab, setActiveTab] = useState<Tab>('results')
 
   const tabs: { id: Tab; label: string }[] = [
@@ -45,7 +46,7 @@ export default function AnalysisPanel({
       </div>
 
       {/* Uyarılar */}
-      {warnings.length > 0 && (
+      {warnings && warnings.length > 0 && (
         <div style={{
           marginBottom: 16,
           padding: '10px 14px',

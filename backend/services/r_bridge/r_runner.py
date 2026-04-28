@@ -53,11 +53,25 @@ def run_r_script(script_name: str, input_data: dict) -> dict:
     try:
         # R uyarılarını filtrele, sadece JSON satırını al
         json_line = None
+        # R uyarı mesajları JSON ile birleşik gelebilir, { karakterini bul
         for l in stdout.strip().split('\n'):
             l = l.strip()
-            if l.startswith('{'):
-                json_line = l
-                break
+            if '{' in l:
+                # Satırda { varsa, { ile başlayan kısmı al
+                idx = l.index('{')
+                candidate = l[idx:]
+                try:
+                    json.loads(candidate)
+                    json_line = candidate
+                    break
+                except Exception:
+                    pass
+        # Tüm stdout'ta { ... } bloğunu bul
+        if not json_line:
+            import re
+            match = re.search(r'(\{.*\})', stdout, re.DOTALL)
+            if match:
+                json_line = match.group(1)
         if not json_line:
             raise ValueError(f"R JSON bulunamadı: {stdout[:200]}")
         result = json.loads(json_line)

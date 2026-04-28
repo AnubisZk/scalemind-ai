@@ -52,6 +52,8 @@ export type AnalysisStepId =
   | 'cfa'
   | 'sem'
   | 'reporting'
+  | 'statistics'
+  | 'statistics'
 
 export type StepStatus = 'pending' | 'active' | 'completed' | 'skipped' | 'error'
 

@@ -63,7 +63,7 @@ class StatisticalDecisionEngine:
             if paired or repeated:
                 if normal is not False: return ("paired_t","Eşleştirilmiş t-Testi önerilir.","Paired t-test recommended.",w)
                 return ("wilcoxon","Wilcoxon testi önerilir.","Wilcoxon test recommended.",w)
-            if req.covariates: return ("ancova","Kovaryant var; ANCOVA önerilir.","Covariate present; ANCOVA recommended.",w)
+            if req.covariate: return ("ancova","Kovaryant var; ANCOVA önerilir.","Covariate present; ANCOVA recommended.",w)
             if normal is False: return ("mann_whitney","Normallik ihlali; Mann-Whitney önerilir.","Normality violated; Mann-Whitney recommended.",w)
             if homo is False: return ("welch_t","Homojenlik ihlali; Welch t önerilir.","Homogeneity violated; Welch t-test recommended.",w)
             return ("independent_t","Bağımsız t-Testi önerilir.","Independent t-test recommended.",w)
@@ -72,7 +72,7 @@ class StatisticalDecisionEngine:
             if repeated:
                 if normal is not False: return ("repeated_measures_anova","Tekrarlı ANOVA önerilir.","Repeated ANOVA recommended.",w)
                 return ("friedman","Friedman testi önerilir.","Friedman test recommended.",w)
-            if req.covariates: return ("ancova","Kovaryant var; ANCOVA önerilir.","Covariate present; ANCOVA recommended.",w)
+            if req.covariate: return ("ancova","Kovaryant var; ANCOVA önerilir.","Covariate present; ANCOVA recommended.",w)
             if normal is False: return ("kruskal_wallis","Kruskal-Wallis önerilir.","Kruskal-Wallis recommended.",w)
             if homo is False: return ("welch_anova","Welch ANOVA önerilir.","Welch ANOVA recommended.",w)
             return ("one_way_anova","Tek Yönlü ANOVA önerilir.","One-Way ANOVA recommended.",w)

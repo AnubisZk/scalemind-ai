@@ -90,15 +90,15 @@ export default {
 
     try {
       // Multipart form (dosya yükleme) — Worker'da işle
-      if (path === '/parse') {
+      if (path === '/parse' || path.startsWith('/statistics/upload') || path.startsWith('/statistics/detect')) {
         const formData = await request.formData()
         const file = formData.get('file') as File
         if (!file) return jsonResponse({ error: 'Dosya bulunamadı' }, 400, origin)
 
-        // Dosyayı backend'e ilet
         const backendForm = new FormData()
         backendForm.append('file', file)
-        const res = await fetch(`${env.R_API_URL}/parse`, {
+        const url_params = request.url.includes('?') ? '?' + request.url.split('?')[1] : ''
+        const res = await fetch(`${env.R_API_URL}${path}${url_params}`, {
           method: 'POST',
           body: backendForm,
         })
@@ -126,11 +126,21 @@ export default {
         '/efa',
         '/cfa',
         '/sem',
+        '/report/pdf',
       ]
 
       if (backendPaths.includes(path)) {
         const result = await bridgeToBackend(env, path, body)
         return jsonResponse({ success: true, result }, 200, origin)
+      }
+
+      // Statistics extension — /statistics/* tüm endpointleri
+      if (path.startsWith('/statistics')) {
+        const result = await bridgeToBackend(env, path, body)
+        return new Response(JSON.stringify(result), {
+          status: 200,
+          headers: corsHeaders(origin),
+        })
       }
 
       return jsonResponse({ error: `Bilinmeyen endpoint: ${path}` }, 404, origin)

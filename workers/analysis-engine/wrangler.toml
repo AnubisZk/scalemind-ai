@@ -4,7 +4,7 @@
 # Bu dosyayı workers/analysis-engine/ klasörüne kopyala
 # ============================================================
 
-name = "scalemind-analysis"
+name = "scalemind-ai"
 main = "index.ts"
 compatibility_date = "2024-09-01"
 

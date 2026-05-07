@@ -4,6 +4,7 @@
 // Latent (oval) + Observed (dikdörtgen) + Hata terimleri
 // ============================================================
 import React, { useState, useCallback, useRef } from 'react'
+import html2canvas from 'html2canvas'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -134,7 +135,43 @@ function SEMEditorInner() {
   const [isRunning, setIsRunning] = useState(false)
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const [warnings, setWarnings] = useState<string[]>([])
+
+  const exportDiagramPNG = async (): Promise<string | null> => {
+    if (!diagramRef.current) return null
+    try {
+      const canvas = await html2canvas(diagramRef.current, {
+        backgroundColor: '#FAFAFA', scale: 2, useCORS: true,
+      })
+      return canvas.toDataURL('image/png')
+    } catch { return null }
+  }
+
+  const exportToPDF = async () => {
+    const BASE_URL = import.meta.env.VITE_ANALYSIS_WORKER_URL || 'https://scalemind-ai-production.up.railway.app'
+    const pngData = await exportDiagramPNG()
+    const reportData: Record<string, unknown> = {
+      title: 'SEM Yol Modeli Raporu',
+      diagram_png: pngData,
+      sem_result: result,
+      fit_indices: fit,
+    }
+    try {
+      const res = await fetch(`${BASE_URL}/report/pdf`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reportData),
+      })
+      if (!res.ok) throw new Error('PDF üretilemedi')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = 'SEM_Yol_Modeli.pdf'
+      document.body.appendChild(a); a.click()
+      document.body.removeChild(a); URL.revokeObjectURL(url)
+    } catch (e) { alert(String(e)) }
+  }
+
   const nodeIdRef = useRef(1)
+  const diagramRef = useRef<HTMLDivElement>(null)
 
   const dataset = project?.dataset
   const likertItems = dataset?.variables.filter((v) => v.type === 'likert').map((v) => v.name) ?? []
@@ -387,7 +424,7 @@ function SEMEditorInner() {
       )}
 
       {/* React Flow Canvas */}
-      <div style={{ flex: 1, minHeight: 500, border: '0.5px solid var(--color-border-tertiary)', borderRadius: 8, overflow: 'hidden', background: '#FAFAFA' }}>
+      <div style={{ flex: 1, minHeight: 500, border: '0.5px solid var(--color-border-tertiary)', borderRadius: 8, overflow: 'hidden', background: '#FAFAFA' }} ref={diagramRef}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -418,6 +455,16 @@ function SEMEditorInner() {
           </Panel>
         </ReactFlow>
       </div>
+
+      {/* PDF Export */}
+      {result && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+          <button onClick={exportToPDF} style={{
+            padding: '8px 16px', background: '#185FA5', color: 'white',
+            border: 'none', borderRadius: 7, fontSize: 13, fontWeight: 600, cursor: 'pointer'
+          }}>📄 PDF İndir (Yol Diyagramı + Uygunluk)</button>
+        </div>
+      )}
 
       {/* SEM Sonuçları */}
       {result && fit && (

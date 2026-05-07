@@ -131,6 +131,10 @@ export default {
 
       if (backendPaths.includes(path)) {
         const result = await bridgeToBackend(env, path, body)
+        // Backend zaten {success, result} formatında döndürüyor, tekrar sarmalama
+        if (typeof result === 'object' && result !== null && 'result' in result) {
+          return jsonResponse(result, 200, origin)
+        }
         return jsonResponse({ success: true, result }, 200, origin)
       }
 

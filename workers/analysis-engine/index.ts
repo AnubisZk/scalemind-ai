@@ -13,8 +13,8 @@ export interface Env {
 function corsHeaders(origin: string): Record<string, string> {
   return {
     'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Content-Type': 'application/json',
   }
 }
@@ -26,7 +26,7 @@ function jsonResponse(data: unknown, status = 200, origin = '*') {
   })
 }
 
-// ------ Yardımcı: R/Python API'ye köprü ------
+// ------ Yardımcı: R/Python API'ye JSON köprü ------
 
 async function bridgeToBackend(
   env: Env,
@@ -38,11 +38,47 @@ async function bridgeToBackend(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
+
   if (!res.ok) {
     const err = await res.text()
     throw new Error(`Backend hatası (${res.status}): ${err}`)
   }
+
   return res.json()
+}
+
+// ------ Yardımcı: Raw proxy — multipart ve JSON body bozulmadan aktarılır ------
+
+async function proxyRawToBackend(
+  request: Request,
+  env: Env,
+  origin: string
+): Promise<Response> {
+  const incomingUrl = new URL(request.url)
+  const targetUrl = `${env.R_API_URL}${incomingUrl.pathname}${incomingUrl.search}`
+
+  const headers = new Headers(request.headers)
+  headers.delete('host')
+
+  const method = request.method.toUpperCase()
+
+  const backendResponse = await fetch(targetUrl, {
+    method,
+    headers,
+    body: method === 'GET' || method === 'HEAD' ? undefined : request.body,
+    redirect: 'manual',
+  })
+
+  const responseHeaders = new Headers(backendResponse.headers)
+  responseHeaders.set('Access-Control-Allow-Origin', origin)
+  responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
+  responseHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+
+  return new Response(backendResponse.body, {
+    status: backendResponse.status,
+    statusText: backendResponse.statusText,
+    headers: responseHeaders,
+  })
 }
 
 // ------ Ön İşleme (Worker'da hesaplanır, hızlı) ------
@@ -56,8 +92,10 @@ function computePreprocessing(
     const missing = vals.filter((x) => x === null || x === '').length
     return { name: v, count: missing, rate: +(missing / vals.length).toFixed(4) }
   })
+
   const totalMissing = byVariable.reduce((a, b) => a + b.count, 0)
   const rowCount = (data[variables[0]] ?? []).length
+
   const rowsWithMissing = Array.from({ length: rowCount }, (_, i) =>
     variables.some((v) => data[v][i] === null || data[v][i] === '')
   ).filter(Boolean).length
@@ -89,23 +127,39 @@ export default {
     const path = url.pathname
 
     try {
-      // Multipart form (dosya yükleme) — Worker'da işle
-      if (path === '/parse' || path.startsWith('/statistics/upload') || path.startsWith('/statistics/detect')) {
+      // Statistics extension:
+      // /statistics/* endpointleri Worker içinde body okunmadan backend'e aktarılır.
+      // Böylece hem multipart/form-data hem JSON body bozulmaz.
+      if (path.startsWith('/statistics')) {
+        return proxyRawToBackend(request, env, origin)
+      }
+
+      // Eski parse endpointi — sadece /parse için multipart form işlenir.
+      if (path === '/parse') {
         const formData = await request.formData()
         const file = formData.get('file') as File
-        if (!file) return jsonResponse({ error: 'Dosya bulunamadı' }, 400, origin)
+
+        if (!file) {
+          return jsonResponse({ error: 'Dosya bulunamadı' }, 400, origin)
+        }
 
         const backendForm = new FormData()
         backendForm.append('file', file)
-        const url_params = request.url.includes('?') ? '?' + request.url.split('?')[1] : ''
-        const res = await fetch(`${env.R_API_URL}${path}${url_params}`, {
+
+        const urlParams = request.url.includes('?')
+          ? '?' + request.url.split('?')[1]
+          : ''
+
+        const res = await fetch(`${env.R_API_URL}${path}${urlParams}`, {
           method: 'POST',
           body: backendForm,
         })
+
         const result = await res.json()
-        return jsonResponse(result, 200, origin)
+        return jsonResponse(result, res.status, origin)
       }
 
+      // Bundan sonra sadece JSON endpointler okunur.
       const body = await request.json() as Record<string, unknown>
 
       // ------ Ön İşleme (Worker'da) ------
@@ -114,6 +168,7 @@ export default {
           body.data as Record<string, (number | string | null)[]>,
           body.variables as string[]
         )
+
         return jsonResponse({ success: true, result }, 200, origin)
       }
 
@@ -131,20 +186,13 @@ export default {
 
       if (backendPaths.includes(path)) {
         const result = await bridgeToBackend(env, path, body)
+
         // Backend zaten {success, result} formatında döndürüyor, tekrar sarmalama
         if (typeof result === 'object' && result !== null && 'result' in result) {
           return jsonResponse(result, 200, origin)
         }
-        return jsonResponse({ success: true, result }, 200, origin)
-      }
 
-      // Statistics extension — /statistics/* tüm endpointleri
-      if (path.startsWith('/statistics')) {
-        const result = await bridgeToBackend(env, path, body)
-        return new Response(JSON.stringify(result), {
-          status: 200,
-          headers: corsHeaders(origin),
-        })
+        return jsonResponse({ success: true, result }, 200, origin)
       }
 
       return jsonResponse({ error: `Bilinmeyen endpoint: ${path}` }, 404, origin)
